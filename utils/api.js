@@ -1,71 +1,80 @@
-// utils/api.js
-// تم تعديله للعمل مع GitHub Pages
-
+// utils/api.js - الملف المعدل
 const scriptURL = "https://script.google.com/macros/s/AKfycbynQrbdtfREukdGi_PWRS-ORAKuqTbowW2U659dG4IdUjtirApr54n5uifuiTUNEwCF/exec";
 
-// دالة عامة لإرسال طلب باستخدام POST و text/plain (طريقة ناجحة)
+// دالة عامة لإرسال طلبات POST
 const trickleRequest = async (action, data = {}) => {
-  const payload = JSON.stringify({ action, ...data });
-
   try {
     const response = await fetch(scriptURL, {
       method: "POST",
       headers: {
-        "Content-Type": "text/plain;charset=utf-8"
+        "Content-Type": "application/json",
       },
-      body: payload
+      body: JSON.stringify({ action, ...data })
     });
-    // لا نستخدم mode: "no-cors" هنا لأن GitHub Pages يدعم CORS جزئيًا
-    return { success: true };
+    
+    if (!response.ok) throw new Error("Network response was not ok");
+    
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error);
+    
+    return result.data;
   } catch (error) {
     console.error("trickleRequest error:", error);
-    throw new Error("فشل في الاتصال بالخادم");
+    throw new Error("فشل في الاتصال بالخادم: " + error.message);
   }
 };
 
-// دالة للقراءة باستخدام GET
+// دالة للحصول على بيانات باستخدام GET
 const trickleGetRequest = async (action, params = {}) => {
-  const url = new URL(scriptURL);
-  Object.keys(params).forEach(key => {
-    if (params[key] !== undefined) {
-      url.searchParams.append(key, params[key]);
-    }
-  });
-
   try {
+    const url = new URL(scriptURL);
+    url.searchParams.append('action', action);
+    
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined) {
+        url.searchParams.append(key, params[key]);
+      }
+    });
+
     const response = await fetch(url, { method: "GET" });
-    if (!response.ok) throw new Error("Network error");
-    return await response.json();
+    if (!response.ok) throw new Error("Network response was not ok");
+    
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error);
+    
+    return result.data;
   } catch (error) {
     console.error("trickleGetRequest error:", error);
-    return null;
+    throw new Error("فشل في الاتصال بالخادم: " + error.message);
   }
 };
 
-// الوظائف الأساسية
+// إنشاء كائن جديد
 const trickleCreateObject = async (type, data) => {
   return await trickleRequest("create", { type, data });
 };
 
+// قراءة كائن واحد
 const trickleGetObject = async (type, id) => {
-  const result = await trickleGetRequest("get", { type, id });
-  return result?.data || null;
+  return await trickleGetRequest("get", { type, id });
 };
 
+// تحديث كائن
 const trickleUpdateObject = async (type, id, data) => {
   return await trickleRequest("update", { type, id, data });
 };
 
+// حذف كائن
 const trickleDeleteObject = async (type, id) => {
   return await trickleRequest("delete", { type, id });
 };
 
+// قائمة الكائنات
 const trickleListObjects = async (type, limit = 100, activeOnly = false) => {
-  const result = await trickleGetRequest("list", { type, limit, activeOnly });
-  return result || { success: false, items: [] };
+  return await trickleGetRequest("list", { type, limit, activeOnly: activeOnly.toString() });
 };
 
-// تصدير الدوال
+// تصدير الوظائف إلى window
 window.trickleCreateObject = trickleCreateObject;
 window.trickleGetObject = trickleGetObject;
 window.trickleUpdateObject = trickleUpdateObject;
