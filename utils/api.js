@@ -1,5 +1,5 @@
 // utils/api.js - إصدار مبسط
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynQrbdtfREukdGi_PWRS-ORAKuqTbowW2U659dG4IdUjtirApr54n5uifuiTUNEwCF/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUb43fwBWeZ2ns0J9k74HgoKGTw0Ahv_MIkqD-stnE-etEKqg2W6JC9qqDQu2olKk/exec";
 
 class API {
   constructor() {
