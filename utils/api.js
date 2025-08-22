@@ -1,6 +1,6 @@
 // utils/api.js
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbySvO62_hYRFUxTRprpqq21t5YQYX8i5Qqy69Nq-NdlzylJwzm5AmeWei2gIfpjmzB38A/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbw8VHxL2G3oQOappgwsNcfUM35KobvNfYtEQTV_nZk4O9zER2fWo_VWPDd1SANJ8giQ/exec";
 
 // دالة عامة لإرسال طلب باستخدام POST و text/plain
 const trickleRequest = async (action, data = {}) => {
