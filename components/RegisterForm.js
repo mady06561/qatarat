@@ -42,7 +42,69 @@ function RegisterForm({ onNavigate }) {
         setLoading(false);
         return;
       }
+// في RegisterForm.js - أضف هذه الدالة
+const testAPIConnection = async () => {
+  try {
+    setLoading(true);
+    setError('');
+    
+    // اختبار الاتصال أولاً
+    if (window.testConnection) {
+      const testResult = await window.testConnection();
+      if (!testResult.success) {
+        setError('تعذر الاتصال بالخادم. يرجى المحاولة لاحقاً.');
+        setLoading(false);
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    setError('تعذر الاتصال بالخادم. يرجى المحاولة لاحقاً.');
+    setLoading(false);
+    return false;
+  }
+};
 
+// ثم عدل دالة handleSubmit لتصبح:
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  
+  // اختبار الاتصال أولاً
+  const isConnected = await testAPIConnection();
+  if (!isConnected) return;
+  
+  // ... باقي الكود الحالي
+  if (formData.password !== formData.confirmPassword) {
+    setError('كلمات المرور غير متطابقة');
+    setLoading(false);
+    return;
+  }
+
+  // ... باقي التحققات
+  setLoading(true);
+
+  try {
+    const users = await trickleListObjects('user', 100, true);
+    // ... باقي الكود
+  } catch (err) {
+    console.error('Error details:', err);
+    setError('حدث خطأ في إنشاء الحساب: ' + (err.message || 'يرجى المحاولة مرة أخرى'));
+  }
+  setLoading(false);
+};
+// في JSX داخل RegisterForm.js
+<button
+  type="button"
+  onClick={testAPIConnection}
+  className="btn btn-secondary w-full mb-4"
+>
+  اختبار الاتصال بالخادم
+</button>
+
+      
       try {
         const users = await trickleListObjects('user', 100, true);
         const existingUser = users.items.find(u => 
