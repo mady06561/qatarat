@@ -1,39 +1,29 @@
 // utils/api.js
-// تم تعديله خصيصًا ليعمل مع قطرات و drv.tw
+// تم تعديله للعمل مع GitHub Pages
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbw8VHxL2G3oQOappgwsNcfUM35KobvNfYtEQTV_nZk4O9zER2fWo_VWPDd1SANJ8giQ/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbynQrbdtfREukdGi_PWRS-ORAKuqTbowW2U659dG4IdUjtirApr54n5uifuiTUNEwCF/exec";
 
-// دالة عامة لإرسال طلب باستخدام GET (الطريقة الوحيدة التي تعمل مع drv.tw)
+// دالة عامة لإرسال طلب باستخدام POST و text/plain (طريقة ناجحة)
 const trickleRequest = async (action, data = {}) => {
-  const params = new URLSearchParams({ action });
-
-  // تحويل البيانات إلى JSON وإضافتها كمعلمة
-  Object.keys(data).forEach(key => {
-    if (data[key] !== undefined) {
-      try {
-        params.append(key, JSON.stringify(data[key]));
-      } catch (e) {
-        console.error(`Error in trickleRequest:`, e);
-      }
-    }
-  });
-
-  const url = `${scriptURL}?${params.toString()}`;
+  const payload = JSON.stringify({ action, ...data });
 
   try {
-    // استخدام GET فقط
-    const response = await fetch(url, {
-      method: "GET",
-      mode: "no-cors" // ضروري
+    const response = await fetch(scriptURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: payload
     });
+    // لا نستخدم mode: "no-cors" هنا لأن GitHub Pages يدعم CORS جزئيًا
     return { success: true };
   } catch (error) {
-    console.error("trickleRequest failed:", error);
+    console.error("trickleRequest error:", error);
     throw new Error("فشل في الاتصال بالخادم");
   }
 };
 
-// دالة للحصول على البيانات (لقراءة القوائم)
+// دالة للقراءة باستخدام GET
 const trickleGetRequest = async (action, params = {}) => {
   const url = new URL(scriptURL);
   Object.keys(params).forEach(key => {
@@ -54,20 +44,7 @@ const trickleGetRequest = async (action, params = {}) => {
 
 // الوظائف الأساسية
 const trickleCreateObject = async (type, data) => {
-  // ضمان أن البيانات تحتوي على الحقول الصحيحة
-  const cleanData = {};
-  if (type === 'user') {
-    cleanData.username = data.username || '';
-    cleanData.email = data.email || '';
-    cleanData.password = data.password || '';
-    cleanData.points = data.points || 0;
-    cleanData.isAdmin = data.isAdmin || false;
-    cleanData.country = data.country || '';
-    cleanData.emailVerified = data.emailVerified || false;
-  } else {
-    Object.assign(cleanData, data);
-  }
-  return await trickleRequest("create", { type, data: cleanData });
+  return await trickleRequest("create", { type, data });
 };
 
 const trickleGetObject = async (type, id) => {
