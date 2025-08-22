@@ -1,31 +1,20 @@
 // utils/api.js
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbyMtZVLu3gr2tZ2MlT3y3QQmBq6weYROju8dnsX65AgIhfmZ_pevds-9wHVbp-9_wiA/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbySvO62_hYRFUxTRprpqq21t5YQYX8i5Qqy69Nq-NdlzylJwzm5AmeWei2gIfpjmzB38A/exec";
 
-// دالة عامة لإرسال طلب باستخدام GET (لأن POST لا يعمل على drv.tw)
+// دالة عامة لإرسال طلب باستخدام POST و text/plain
 const trickleRequest = async (action, data = {}) => {
-  const params = new URLSearchParams({ action });
-  
-  // تحويل البيانات إلى JSON ووضعها في الرابط
-  Object.keys(data).forEach(key => {
-    if (data[key] !== undefined) {
-      try {
-        params.append(key, JSON.stringify(data[key]));
-      } catch (e) {
-        console.error(`Error stringifying ${key}:`, e);
-      }
-    }
-  });
-
-  const url = `${scriptURL}?${params.toString()}`;
+  const payload = JSON.stringify({ action, ...data });
 
   try {
-    // استخدام fetch مع GET
-    const response = await fetch(url, {
-      method: "GET",
-      mode: "no-cors" // ضروري لأن Google Apps Script لا يدعم CORS
+    const response = await fetch(scriptURL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: payload
     });
-    // لا يمكن قراءة الاستجابة بسبب no-cors، لكن الطلب يُرسل
     return { success: true };
   } catch (error) {
     console.error("trickleRequest error:", error);
@@ -33,18 +22,16 @@ const trickleRequest = async (action, data = {}) => {
   }
 };
 
-// دالة للحصول على بيانات باستخدام GET (لقراءة البيانات فقط)
+// دالة للقراءة باستخدام GET
 const trickleGetRequest = async (action, params = {}) => {
   const url = new URL(scriptURL);
   Object.keys(params).forEach(key => {
-    if (params[key] !== undefined) {
-      url.searchParams.append(key, params[key]);
-    }
+    url.searchParams.append(key, params[key]);
   });
 
   try {
     const response = await fetch(url, { method: "GET" });
-    if (!response.ok) throw new Error("Network response was not ok");
+    if (!response.ok) throw new Error("Network error");
     return await response.json();
   } catch (error) {
     console.error("trickleGetRequest error:", error);
@@ -52,34 +39,30 @@ const trickleGetRequest = async (action, params = {}) => {
   }
 };
 
-// إنشاء كائن جديد
+// الوظائف الأساسية
 const trickleCreateObject = async (type, data) => {
   return await trickleRequest("create", { type, data });
 };
 
-// قراءة كائن واحد
 const trickleGetObject = async (type, id) => {
   const result = await trickleGetRequest("get", { type, id });
   return result?.data || null;
 };
 
-// تحديث كائن
 const trickleUpdateObject = async (type, id, data) => {
   return await trickleRequest("update", { type, id, data });
 };
 
-// حذف كائن
 const trickleDeleteObject = async (type, id) => {
   return await trickleRequest("delete", { type, id });
 };
 
-// قائمة الكائنات
 const trickleListObjects = async (type, limit = 100, activeOnly = false) => {
   const result = await trickleGetRequest("list", { type, limit, activeOnly });
   return result || { success: false, items: [] };
 };
 
-// تصدير الوظائف إلى window
+// تصدير الدوال
 window.trickleCreateObject = trickleCreateObject;
 window.trickleGetObject = trickleGetObject;
 window.trickleUpdateObject = trickleUpdateObject;
