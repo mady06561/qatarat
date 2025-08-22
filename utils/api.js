@@ -1,6 +1,6 @@
 // utils/api.js
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbxjAGQnOt_ab-bRLXKQ8uUHEK9x6WThCzJZ4A8-1hMl2V6ZDGUJ-hd1pVNiDO_hdlhf1Q/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbyqpFJ_J_dFw_d0TEbmsLQcuslkFw7CmHc9lfW9BmZuCD2RrdDZDYFh-yU4PJASgKw9/exec";
 
 // دالة عامة لإرسال طلب باستخدام GET (لأن POST لا يعمل على drv.tw)
 const trickleRequest = async (action, data = {}) => {
