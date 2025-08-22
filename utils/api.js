@@ -58,7 +58,7 @@
 
           // Submit form data
           const scriptURL =
-            "https://script.google.com/macros/s/AKfycbyqpFJ_J_dFw_d0TEbmsLQcuslkFw7CmHc9lfW9BmZuCD2RrdDZDYFh-yU4PJASgKw9/exec";
+            "https://script.google.com/macros/s/AKfycbyMtZVLu3gr2tZ2MlT3y3QQmBq6weYROju8dnsX65AgIhfmZ_pevds-9wHVbp-9_wiA/exec";
 
           const response = await fetch(scriptURL, {
             redirect: "follow",
