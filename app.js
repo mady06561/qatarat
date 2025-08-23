@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component {
 }
 
 // Replace with your Google Apps Script URL
-const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbzXFksL0mcPBa-MgyauDnaNG23F4i63k0qr2TkK7-LnXVLCJK0znoeoQD0-dr7lB2w_EQ/exec";
 
 // API Functions
 async function trickleCreateObject(table, objectData) {
