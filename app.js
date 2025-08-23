@@ -9,7 +9,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo.componentStack);
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   render() {
@@ -18,7 +18,7 @@ class ErrorBoundary extends React.Component {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">حدث خطأ</h1>
-            <p className="text-gray-600 mb-4">نعتذر، حدث خطأ غير متوقع</p>
+            <p className="text-gray-600 mb-4">عذراً، حدث خطأ غير متوقع.</p>
             <button
               onClick={() => window.location.reload()}
               className="btn btn-primary"
@@ -31,6 +31,111 @@ class ErrorBoundary extends React.Component {
     }
 
     return this.props.children;
+  }
+}
+
+// Replace with your Google Apps Script URL
+const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+// API Functions
+async function trickleCreateObject(table, objectData) {
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'create',
+        table: table,
+        objectData: objectData
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating object:', error);
+    throw error;
+  }
+}
+
+async function trickleGetObject(table, objectId) {
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'read',
+        table: table,
+        objectId: objectId
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting object:', error);
+    throw error;
+  }
+}
+
+async function trickleUpdateObject(table, objectId, objectData) {
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'update',
+        table: table,
+        objectId: objectId,
+        objectData: objectData
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating object:', error);
+    throw error;
+  }
+}
+
+async function trickleDeleteObject(table, objectId) {
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'delete',
+        table: table,
+        objectId: objectId
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting object:', error);
+    throw error;
+  }
+}
+
+async function trickleListObjects(table, limit = 100) {
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'list',
+        table: table,
+        limit: limit
+      })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error listing objects:', error);
+    throw error;
   }
 }
 
@@ -80,6 +185,11 @@ function App() {
       setCurrentPage('login');
     };
 
+    const handleUserUpdate = (updatedUser) => {
+      setCurrentUser(updatedUser);
+      StorageUtils.setCurrentUser(updatedUser);
+    };
+
     if (loading) {
       return (
         <div className="min-h-screen flex items-center justify-center">
@@ -113,21 +223,15 @@ function App() {
           </main>
         )}
         
-        {currentPage === 'register' && !currentUser && (
-          <main className="container mx-auto px-4 py-8">
-            <RegisterForm onNavigate={setCurrentPage} />
-          </main>
-        )}
-        
         {currentPage === 'privacy' && (
           <main className="container mx-auto px-4 py-8">
             <PrivacyPolicy language={currentLanguage} />
           </main>
         )}
         
-        {currentPage === 'about' && (
+        {currentPage === 'register' && !currentUser && (
           <main className="container mx-auto px-4 py-8">
-            <AboutUs language={currentLanguage} />
+            <RegisterForm onNavigate={setCurrentPage} />
           </main>
         )}
         
@@ -136,7 +240,7 @@ function App() {
             <Dashboard 
               currentUser={currentUser} 
               onNavigate={setCurrentPage}
-              onUserUpdate={setCurrentUser}
+              onUserUpdate={handleUserUpdate}
             />
           </main>
         )}
@@ -149,19 +253,19 @@ function App() {
         
         {currentPage === 'websites' && currentUser && (
           <main className="container mx-auto px-4 py-8">
-            <WebsiteList currentUser={currentUser} onUserUpdate={setCurrentUser} />
+            <WebsiteList currentUser={currentUser} onUserUpdate={handleUserUpdate} />
           </main>
         )}
         
         {currentPage === 'add-website' && currentUser && (
           <main className="container mx-auto px-4 py-8">
-            <AddWebsite currentUser={currentUser} onUserUpdate={setCurrentUser} onNavigate={setCurrentPage} />
+            <AddWebsite currentUser={currentUser} onUserUpdate={handleUserUpdate} onNavigate={setCurrentPage} />
           </main>
         )}
         
         {currentPage === 'visit-sites' && currentUser && (
           <main className="container mx-auto px-4 py-8">
-            <VisitSites currentUser={currentUser} onUserUpdate={setCurrentUser} />
+            <VisitSites currentUser={currentUser} onUserUpdate={handleUserUpdate} />
           </main>
         )}
         
